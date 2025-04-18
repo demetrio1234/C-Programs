@@ -88,68 +88,6 @@ char **listFilesInFolder(char folderName[], int *count)
     return fileList;
 }
 
-/*
-char **listFilesInFolder(char folderName[], int *count)
-{
-    struct dirent *entry;
-    DIR *folder = opendir(folderName); // Open the directory
-    char **fileList = NULL;
-    *count = 0;
-
-    if (folder == NULL)
-    {
-        perror("Unable to open directory");
-        return NULL;
-    }
-
-    while ((entry = readdir(folder)) != NULL)
-    {
-        // Skip "." and ".." entries
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-        {
-            continue;
-        }
-
-        // Allocate memory for the new file name
-        fileList = realloc(fileList, (*count + 1) * sizeof(char *));
-        fileList[*count] = malloc(strlen(entry->d_name) + 1);
-        strcpy(fileList[*count], entry->d_name);
-        (*count)++;
-    }
-
-    closedir(folder); // Close the directory
-    return fileList;
-}
-*/
-
-/*
-void listFilesInFolder(char folderName[])
-{
-    struct dirent *entry;
-    DIR *folder = opendir(folderName); // Open the directory
-
-    if (folder == NULL)
-    {
-        perror("Unable to open directory");
-        return;
-    }
-
-    printf("Files in the directory '%s':\n", folderName);
-    while ((entry = readdir(folder)) != NULL)
-    {
-        // Skip "." and ".." entries
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-        {
-            continue;
-        }
-
-        printf("%s\n", entry->d_name); // Print the name of each file
-    }
-
-    closedir(folder); // Close the directory
-}
-*/
-
 int main()
 {
     char folderName[1024];
