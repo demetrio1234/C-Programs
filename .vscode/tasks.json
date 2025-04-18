@@ -1,0 +1,22 @@
+{
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "Build main.exe with GCC",
+      "command": "gcc",
+      "args": [
+        "-o",
+        "main.exe",
+        "main.c",
+        ".\\includes\\file_utils.c",
+        "-Iincludes",
+        "-g",
+        "-v"
+      ],
+      "group": "build",
+      "problemMatcher": ["$gcc"],
+      "detail": "Custom build task for main.exe"
+    }
+  ],
+  "version": "2.0.0"
+}
