@@ -1,36 +1,197 @@
 #include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include <stdlib.h>
+#ifdef _WIN32
+#include "dirent.h" // Include the custom dirent.h for Windows
+#else
+#include <dirent.h> // Use the standard dirent.h for Unix-based systems
+#endif
+#include <string.h> // For strcat
 
-int add(int x, int y);
-void printSum(int x, int y);
+int printFile(char filename[])
+{
+    FILE *file;
+    char ch;
+
+    // Open the file in read mode
+    file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        perror("Error opening file");
+        return 1;
+    }
+
+    printf("File content of %s:\n", filename);
+
+    // Read and print each character until EOF
+    while ((ch = fgetc(file)) != EOF)
+    {
+        putchar(ch);
+    }
+
+    // Close the file
+    fclose(file);
+    return 0;
+}
+
+char **listFilesInFolder(char folderName[], int *count)
+{
+    struct dirent *entry;
+    DIR *folder = opendir(folderName); // Open the directory
+    char **fileList = NULL;
+    *count = 0;
+
+    if (folder == NULL)
+    {
+        perror("Unable to open directory");
+        return NULL;
+    }
+
+    printf("Files in the directory:\n");
+
+    while ((entry = readdir(folder)) != NULL)
+    {
+        // Skip "." and ".." entries
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        // Allocate memory for the new file name
+        char **temp = realloc(fileList, (*count + 1) * sizeof(char *));
+        if (temp == NULL)
+        {
+            perror("Memory allocation failed");
+            free(fileList); // Free previously allocated memory
+            closedir(folder);
+            return NULL;
+        }
+        fileList = temp;
+
+        fileList[*count] = malloc(strlen(entry->d_name) + 1);
+        if (fileList[*count] == NULL)
+        {
+            perror("Memory allocation failed");
+            for (int i = 0; i < *count; i++)
+            {
+                free(fileList[i]);
+            }
+            free(fileList);
+            closedir(folder);
+            return NULL;
+        }
+
+        strcpy(fileList[*count], entry->d_name);
+        (*count)++;
+    }
+
+    closedir(folder); // Close the directory
+    return fileList;
+}
+
+/*
+char **listFilesInFolder(char folderName[], int *count)
+{
+    struct dirent *entry;
+    DIR *folder = opendir(folderName); // Open the directory
+    char **fileList = NULL;
+    *count = 0;
+
+    if (folder == NULL)
+    {
+        perror("Unable to open directory");
+        return NULL;
+    }
+
+    while ((entry = readdir(folder)) != NULL)
+    {
+        // Skip "." and ".." entries
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        // Allocate memory for the new file name
+        fileList = realloc(fileList, (*count + 1) * sizeof(char *));
+        fileList[*count] = malloc(strlen(entry->d_name) + 1);
+        strcpy(fileList[*count], entry->d_name);
+        (*count)++;
+    }
+
+    closedir(folder); // Close the directory
+    return fileList;
+}
+*/
+
+/*
+void listFilesInFolder(char folderName[])
+{
+    struct dirent *entry;
+    DIR *folder = opendir(folderName); // Open the directory
+
+    if (folder == NULL)
+    {
+        perror("Unable to open directory");
+        return;
+    }
+
+    printf("Files in the directory '%s':\n", folderName);
+    while ((entry = readdir(folder)) != NULL)
+    {
+        // Skip "." and ".." entries
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        printf("%s\n", entry->d_name); // Print the name of each file
+    }
+
+    closedir(folder); // Close the directory
+}
+*/
 
 int main()
 {
-    printSum(5, 6);
+    char folderName[1024];
+    printf("Enter the folder to scan: ");
+    scanf("%1023s", folderName); // Read user input, limiting to 1023 characters
 
-    int a = 42;
-    printf("Age: %d", a);
+    struct dirent *entry;
+    DIR *folder = opendir(folderName); // Open the directory
 
-    int res = add(10, 15);
+    if (folder == NULL)
+    {
+        perror("Unable to open directory");
+        return 1;
+    }
 
-    printf("\n%d", res);
+    int fileCount = 0;
+    char **fileNames = listFilesInFolder(folderName, &fileCount);
 
-    char v[] = "12345";
-    char y[] = "12345";
+    printf("Number of files in the folder: %d\n", fileCount);
 
-    int ret = strcmp(v, y);
+    while ((entry = readdir(folder)) != NULL)
+    {
+        // Skip "." and ".." entries
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
 
-    return a - a;
-}
+        printf("%s\n", entry->d_name); // Print the name of each file
 
-int add(int x, int y)
-{
-    return x + y;
-}
+        // Construct the full path
+        char fullPath[1024];
+        snprintf(fullPath, sizeof(fullPath), "/usr/share/ca-certificates/%s", entry->d_name);
 
-void printSum(int x, int y)
-{
-    int sum = x + y;
-    printf("%d", sum);
+        // Pass the full path to printFile
+        if (printFile(fullPath) != 0)
+        {
+            closedir(folder);
+            return -1;
+        }
+    }
+
+    closedir(folder); // Close the directory
+    return 0;
 }
