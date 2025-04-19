@@ -8,7 +8,7 @@
         "-o",
         "main.exe",
         "main.c",
-        ".\\includes\\file_utils.c",
+        "includes/*.c",
         "-Iincludes",
         "-g",
         "-v"
