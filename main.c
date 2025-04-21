@@ -21,7 +21,7 @@ int main()
     }
 
     int fileCount = 0;
-    char **fileNames = listFilesInFolder(folderName, &fileCount);
+    char **fileNames = listFilesInFolderWithProperties(folderName, &fileCount, true);
 
     printf("Number of items in the folder: %d\n", fileCount);
 
@@ -29,9 +29,7 @@ int main()
     {
         // Skip "." and ".." entries
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-        {
             continue;
-        }
 
         printf("%s\n", entry->d_name); // Print the name of each file
 
